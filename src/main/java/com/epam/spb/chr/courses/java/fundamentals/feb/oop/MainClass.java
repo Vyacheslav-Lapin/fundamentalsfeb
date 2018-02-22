@@ -1,3 +1,5 @@
+package com.epam.spb.chr.courses.java.fundamentals.feb.oop;
+
 public class MainClass {
     public static void main(String... args) {
         AboutJava object = new AboutJava();
