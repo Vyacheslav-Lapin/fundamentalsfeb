@@ -1,4 +1,4 @@
-package com.epam.spb.chr.courses.java.fundamentals.feb.oop;
+package com.epam.spb.chr.courses.java.fundamentals.feb.commons;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
