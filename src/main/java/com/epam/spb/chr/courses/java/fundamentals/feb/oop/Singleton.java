@@ -1,8 +1,14 @@
 package com.epam.spb.chr.courses.java.fundamentals.feb.oop;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
+import static lombok.AccessLevel.PRIVATE;
+
+@FieldDefaults(level = PRIVATE)
 public class Singleton {
 
-    private static Singleton instance;
+    static Singleton instance;
 
     private Singleton() {
     }

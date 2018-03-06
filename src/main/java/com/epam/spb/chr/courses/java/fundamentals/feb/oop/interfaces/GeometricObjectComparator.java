@@ -16,21 +16,16 @@ public class GeometricObjectComparator implements Comparator<GeometricObject> {
         set.add(new CircleGO(40));
         set.add(new RectangleGO(4, 1));
 
-        Arrays.sor
-
         System.out.println("A sorted set of geometric objects");
 
-        for (GeometricObject object : set) {
+        for (GeometricObject object : set)
             System.out.printf("area = %s on object %s%n", object.getArea(), object);
-        }
     }
 
+    @Override
     public int compare(GeometricObject o1, GeometricObject o2) {
 
-        double area1 = o1.getArea();
-        double area2 = o2.getArea();
-
-        return Double.compare(area1, area2);
+        return Double.compare(o1.getArea(), o2.getArea());
     }
 
 }
