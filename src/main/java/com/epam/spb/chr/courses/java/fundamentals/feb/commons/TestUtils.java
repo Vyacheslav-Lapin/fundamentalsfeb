@@ -5,7 +5,6 @@ import lombok.experimental.UtilityClass;
 import lombok.val;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 
 @UtilityClass

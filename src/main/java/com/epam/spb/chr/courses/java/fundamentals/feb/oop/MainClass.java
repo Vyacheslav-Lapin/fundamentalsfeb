@@ -30,7 +30,7 @@ public class MainClass {
 //        System.out.println(x);
 //        getString();
 
-        AboutJava object = new AboutJava();
-        object.printReleaseData();
+//        AboutJava object = new AboutJava();
+//        object.printReleaseData();
     }
 }

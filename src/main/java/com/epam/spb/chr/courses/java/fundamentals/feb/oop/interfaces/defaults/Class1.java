@@ -8,7 +8,8 @@ public class Class1 implements Int1 {
     }
 
     @Override
-    public int getX() {
-        return 100_500;
+    public String m2() {
+
+        return null;
     }
 }
