@@ -1,12 +1,11 @@
 package com.epam.courses.jf.intro.io;
 
-import com.epam.courses.jf.intro.io.ResourceProperties;
-import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ResourcePropertiesTest {
 

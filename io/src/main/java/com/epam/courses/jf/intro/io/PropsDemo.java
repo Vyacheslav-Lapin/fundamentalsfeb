@@ -24,11 +24,15 @@ public class PropsDemo {
     String prop1;
     int prop2;
 
-    @SneakyThrows
     public static <T> T getFromProperties(Class<T> aClass) {
+        return getFromProperties(aClass, aClass.getSimpleName());
+    }
+
+    @SneakyThrows
+    public static <T> T getFromProperties(Class<T> aClass, String fileName) {
 
         val properties = new Properties();
-        String name = String.format("/%s.properties", aClass.getSimpleName());
+        String name = String.format("/%s.properties", fileName);
         try (InputStream resourceAsStream = PropsDemo.class.getResourceAsStream(name)) {
             properties.load(resourceAsStream);
         }
