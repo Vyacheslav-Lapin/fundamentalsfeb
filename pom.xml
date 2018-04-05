@@ -2,99 +2,111 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.epam.courses.spb.java.fundamentals</groupId>
     <artifactId>fundamentals-feb</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>intro</module>
+        <module>core</module>
+        <module>io</module>
+        <module>oop</module>
+        <module>jdbc</module>
+    </modules>
+
+    <!-- ./lib as repository -->
+    <repositories>
+        <repository>
+            <id>lib</id>
+            <name>lib</name>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>file://${project.basedir}/lib</url>
+        </repository>
+    </repositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>9</java.version>
+        <java.version>10</java.version>
     </properties>
-    
-    <dependencies>
 
-        <!-- COMMON LIBS (Log4J2 & Vavr) -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>LATEST</version>
-            <optional>true</optional>
-        </dependency>
+    <dependencyManagement>
+        <dependencies>
 
-        <!-- CODE GENERATION (Lombok & CheckerFramework) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>edu.washington.cs.types.checker</groupId>
-            <artifactId>checker-framework</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
-        </dependency>
+            <!-- COMMON LIBS (Log4J2 & Vavr) -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>2.11.0</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>io.vavr</groupId>
+                <artifactId>vavr</artifactId>
+                <version>LATEST</version>
+            </dependency>
 
-        <!-- TEST (JUnit 5 & Mockito) -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>java-hamcrest</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency><!-- Only required to run tests in an IDE that bundles an older version -->
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency><!-- Only required to run tests in an IDE that bundles an older version -->
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency><!-- Only required to run tests in an IDE that bundles an older version -->
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>LATEST</version>
-            <scope>test</scope>
-        </dependency>
-        
-    </dependencies>
+            <!-- CODE GENERATION (Lombok & CheckerFramework) -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <!--<version>LATEST</version>-->
+                <version>1.16.21</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>edu.washington.cs.types.checker</groupId>
+                <artifactId>checker-framework</artifactId>
+                <version>LATEST</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- TEST (JUnit 5 & Mockito) -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>LATEST</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>java-hamcrest</artifactId>
+                <version>LATEST</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>LATEST</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>LATEST</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
 
-            <!-- COMPILER (Java9+ and lombok compatible) -->
+            <!-- COMPILER (Java10+ and lombok compatible) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>${java.version}</source>
+                    <source>${java.version}</source><!--10-->
                     <target>${java.version}</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
@@ -120,30 +132,42 @@
                         <arg>-Jjdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>LATEST</version> <!-- Use newer version of ASM -->
+                    </dependency>
+                </dependencies>
             </plugin>
 
-            <!-- JAR with dependencies -->
+            <!-- SUREFIRE (compatible with JUnit 5+, Java 9+, Lombok) -->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.epam.spb.chr.courses.java.fundamentals.feb.oop.MainClass</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <argLine>--add-modules java.se.ee</argLine>
+                    <includes>
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestCase.java</include>
+                    </includes>
+                    <properties>
+                        <!--<includeTags>fast</includeTags>-->
+                        <excludeTags>slow</excludeTags>
+                        <!--<configurationParameters>-->
+                        <!--junit.jupiter.conditions.deactivate = *-->
+                        <!--</configurationParameters>-->
+                    </properties>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>LATEST</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
         </plugins>
