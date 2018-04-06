@@ -1,20 +1,24 @@
 package com.epam.courses.jf.intro.jdbc;
 
+import io.vavr.CheckedFunction1;
+import io.vavr.Function2;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import lombok.val;
 
-import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.epam.courses.jf.intro.io.PropsDemo.getFromProperties;
 import static lombok.AccessLevel.PRIVATE;
@@ -32,23 +36,34 @@ public class ConnectionPool implements Supplier<Connection> {
 
         int poolSize = connectionFactory.getPoolSize();
         connectionQueue = new ArrayBlockingQueue<>(poolSize);
-        for (int i = 0; i < poolSize; i++)
-            connectionQueue.add(new PooledConnection(connectionFactory.get(),
-                    this::closePolledConnection));
+        IntStream.range(0, poolSize)
+                .mapToObj(__ -> connectionFactory.get())
+                .map(connection -> new PooledConnection(connection, this::closePolledConnection))
+                .forEach(connectionQueue::add); // TODO: 06/04/2018 write collector
 
-        String initScriptsPath = connectionFactory.getInitScriptsPath();
-
-        String sql = IntStream.range(1, 100)
-                .mapToObj(value -> initScriptsPath + "/" + value + ".sql")
-                .map(File::new)
-                .filter(File::exists)
-                .map(ConnectionPool::getFileAsString)
-                .reduce("", (s, s2) -> s + s2);
+        val getFileAsString = Function2.narrow(ConnectionPool::getFileAsString)
+                .apply(connectionFactory.getInitScriptsPath());
 
         try (Connection connection = get();
-             Statement statement = connection.createStatement()) {
-            statement.executeUpdate(sql);
+             val statement = connection.createStatement()) {
+            statement.executeUpdate(
+                    IntStream.iterate(1, operand -> operand + 1)
+                            .mapToObj(String::valueOf)
+                            .map(getFileAsString)
+                            .takeWhile(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.joining()));
         }
+    }
+
+    @SneakyThrows
+    private static Optional<String> getFileAsString(String initScriptsPath, String name) {
+        val path = String.format("/%s/%s.sql", initScriptsPath, name);
+        return Optional.ofNullable(ConnectionPool.class.getResource(path))
+                .map(CheckedFunction1.narrow(URL::toURI).unchecked())
+                .map(Paths::get)
+                .map(CheckedFunction1.<Path, Stream<String>>narrow(Files::lines).unchecked())
+                .map(stringStream -> stringStream.collect(Collectors.joining()));
     }
 
     @SneakyThrows
@@ -73,12 +88,5 @@ public class ConnectionPool implements Supplier<Connection> {
     @Override
     public Connection get() {
         return takeConnection();
-    }
-
-    @SneakyThrows
-    private static String getFileAsString(File file) {
-        return Files.readAllLines(Paths.get(file.toURI()))
-        .stream()
-        .collect(Collectors.joining());
     }
 }
