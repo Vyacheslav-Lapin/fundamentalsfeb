@@ -1,11 +1,13 @@
 package com.epam.courses.jf.intro.jdbc;
 
 import io.vavr.CheckedFunction1;
+import io.vavr.Function1;
 import io.vavr.Function2;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.val;
 
+import java.io.Closeable;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,24 +27,28 @@ import static com.epam.courses.jf.intro.io.PropsDemo.getFromProperties;
 import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(level = PRIVATE)
-public class ConnectionPool implements Supplier<Connection> {
+public class ConnectionPool implements Supplier<Connection>, Closeable {
 
-    BlockingQueue<Connection> connectionQueue;
+    final BlockingQueue<PooledConnection> connectionQueue;
+    volatile boolean opened;
 
     @SneakyThrows
     public ConnectionPool() {
 
-        ConnectionFactory connectionFactory = getFromProperties(
-                ConnectionFactory.class, "db");
+        ConnectionFactory connectionFactory = getFromProperties(ConnectionFactory.class, "db");
+
+        Function<Connection, PooledConnection> pooledConnectionFactory = Function2.narrow(
+                PooledConnection::new)
+                .apply(this::closePolledConnection);
 
         int poolSize = connectionFactory.getPoolSize();
-        connectionQueue = new ArrayBlockingQueue<>(poolSize);
-        IntStream.range(0, poolSize)
+        connectionQueue = IntStream.range(0, poolSize)
                 .mapToObj(__ -> connectionFactory.get())
-                .map(connection -> new PooledConnection(connection, this::closePolledConnection))
-                .forEach(connectionQueue::add); // TODO: 06/04/2018 write collector
+                .map(pooledConnectionFactory)
+                .collect(Collectors.toCollection(() -> new ArrayBlockingQueue<>(poolSize)));
 
-        val getFileAsString = Function2.narrow(ConnectionPool::getFileAsString)
+        Function<String, Optional<String>> getFileAsString = Function2.narrow(
+                ConnectionPool::getFileAsString)
                 .apply(connectionFactory.getInitScriptsPath());
 
         try (Connection connection = get();
@@ -67,16 +74,19 @@ public class ConnectionPool implements Supplier<Connection> {
     }
 
     @SneakyThrows
-    private void closePolledConnection(Connection connection) {
-        if (connection.isClosed())
-            throw new RuntimeException("Attempting to close closed connection.");
-        if (connection.isReadOnly())
-            connection.setReadOnly(false);
-        if (!connectionQueue.offer(connection))
-            throw new SQLException("Error allocating connection in the pool.");
+    private void closePolledConnection(PooledConnection connection) {
+        if (opened) {
+            if (connection.isClosed())
+                throw new RuntimeException("Attempting to close closed connection.");
+            if (connection.isReadOnly())
+                connection.setReadOnly(false);
+            if (!connectionQueue.offer(connection))
+                throw new SQLException("Error allocating connection in the pool.");
+        } else
+            connection.reallyClose();
     }
 
-    public Connection takeConnection() throws ConnectionPoolException {
+    public Connection takeConnection() {
         try {
             return connectionQueue.take();
         } catch (InterruptedException e) {
@@ -88,5 +98,11 @@ public class ConnectionPool implements Supplier<Connection> {
     @Override
     public Connection get() {
         return takeConnection();
+    }
+
+    @Override
+    public void close() {
+        opened = false;
+        connectionQueue.forEach(PooledConnection::reallyClose);
     }
 }

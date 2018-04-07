@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>oop</artifactId>
+    <artifactId>threads</artifactId>
 
     <dependencies>
         <!-- Core module -->
@@ -57,6 +57,7 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
         </dependency>
-
     </dependencies>
+
+
 </project>
