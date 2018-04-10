@@ -24,9 +24,7 @@ class PropertiesTest {
     @SneakyThrows
     @BeforeAll
     static void setUp() {
-        @Cleanup
-        val inputStream = PropertiesTest.class
-                .getResourceAsStream(PROPS_FILE_NAME);
+        @Cleanup val inputStream = PropertiesTest.class .getResourceAsStream(PROPS_FILE_NAME);
         properties.load(inputStream);
     }
 
@@ -34,9 +32,7 @@ class PropertiesTest {
     @DisplayName("getProperties method works correctly")
     void getProperties() {
         assertThat(properties.getProperty("prop1"), is("val1"));
-
         assertThat(properties.getProperty("prop2", "3"), is("2"));
-
         assertThat(properties.getProperty("prop3", "3"), is("3"));
     }
 }

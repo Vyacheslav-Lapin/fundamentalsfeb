@@ -73,9 +73,15 @@ public class ConnectionPool implements Supplier<Connection>, Closeable {
         val path = String.format("/%s/%s.sql", initScriptsPath, name);
         return Optional.ofNullable(ConnectionPool.class.getResourceAsStream(path))
                 .map(Scanner::new)
-                .map(scanner -> scanner.useDelimiter(System.lineSeparator()))
+                .map(scanner -> scanner.useDelimiter(System.lineSeparator())) //peek
                 .map(ConnectionPool::withStream)
                 .map(ConnectionPool::collect);
+    }
+
+    private static Tuple2<Scanner, Stream<String>> withStream(Scanner scanner) {
+        return Tuple.of(scanner, StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(scanner, ORDERED),
+                false));
     }
 
     private static String collect(Tuple2<Scanner, Stream<String>> scannerAndStreamTuple) {
@@ -83,12 +89,6 @@ public class ConnectionPool implements Supplier<Connection>, Closeable {
             val lines = scannerAndStreamTuple._2;
             return lines.collect(Collectors.joining());
         }
-    }
-
-    private static Tuple2<Scanner, Stream<String>> withStream(Scanner scanner) {
-        return Tuple.of(scanner, StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(scanner, ORDERED),
-                false));
     }
 
     @SneakyThrows
