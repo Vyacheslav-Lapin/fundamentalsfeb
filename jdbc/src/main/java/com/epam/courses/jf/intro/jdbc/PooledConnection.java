@@ -1,6 +1,5 @@
 package com.epam.courses.jf.intro.jdbc;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
@@ -10,15 +9,16 @@ import java.io.Closeable;
 import java.sql.Connection;
 import java.util.function.Consumer;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 public class PooledConnection implements Connection {
 
     Consumer<PooledConnection> closer;
 
     @Delegate(excludes = Closeable.class)
     Connection connection;
-
 
     @Override
     public void close() {

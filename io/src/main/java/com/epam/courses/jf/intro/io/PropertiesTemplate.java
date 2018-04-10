@@ -9,14 +9,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public interface ResourceProperties extends Supplier<Properties> {
+public interface PropertiesTemplate extends Supplier<Properties> {
 
     @SneakyThrows
-    static ResourceProperties from(String resourceName) {
-        String res = String.format("/%s.properties", resourceName);
+    static PropertiesTemplate from(String resourceName) {
         val properties = new Properties();
+        String res = String.format("/%s.properties", resourceName);
         try (InputStream resourceAsStream =
-                     ResourceProperties.class.getResourceAsStream(res)) {
+                     PropertiesTemplate.class.getResourceAsStream(res)) {
             properties.load(resourceAsStream);
         }
         return () -> properties;

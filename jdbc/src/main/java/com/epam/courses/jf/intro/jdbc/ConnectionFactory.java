@@ -1,6 +1,5 @@
 package com.epam.courses.jf.intro.jdbc;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.Value;
@@ -16,8 +15,6 @@ import static lombok.AccessLevel.PUBLIC;
 @Value
 @Getter(NONE)
 public class ConnectionFactory implements Supplier<Connection> {
-    @NonFinal
-    static boolean isNotInited;
 
     String driver;
     String url;
@@ -33,10 +30,6 @@ public class ConnectionFactory implements Supplier<Connection> {
     @Override
     @SneakyThrows
     public Connection get() {
-        if (isNotInited) {
-            isNotInited = true;
-            Class.forName(driver);
-        }
         return DriverManager.getConnection(url, user, password);
     }
 }

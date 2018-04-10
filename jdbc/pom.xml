@@ -12,20 +12,21 @@
     <artifactId>jdbc</artifactId>
 
     <dependencies>
-        <!-- Core module -->
+        <!-- Modules: Core, IO, Functional -->
         <dependency>
             <groupId>com.epam.courses.spb.java.fundamentals</groupId>
             <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
-
-        <!-- Core module -->
         <dependency>
             <groupId>com.epam.courses.spb.java.fundamentals</groupId>
             <artifactId>io</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.epam.courses.spb.java.fundamentals</groupId>
+            <artifactId>functional</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <!-- COMMON LIBS (Log4J2 & Vavr) -->

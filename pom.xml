@@ -15,6 +15,7 @@
         <module>oop</module>
         <module>jdbc</module>
         <module>threads</module>
+        <module>functional</module>
     </modules>
 
     <!-- ./lib as repository -->

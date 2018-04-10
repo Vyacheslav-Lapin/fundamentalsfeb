@@ -1,20 +1,18 @@
 package com.epam.courses.jf.intro.jdbc;
 
-import io.vavr.CheckedFunction1;
-import io.vavr.Function1;
 import io.vavr.Function2;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import lombok.val;
 
 import java.io.Closeable;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
+import java.util.Scanner;
+import java.util.Spliterators;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
@@ -22,8 +20,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static com.epam.courses.jf.intro.io.PropsDemo.getFromProperties;
+import static com.epam.courses.jf.intro.io.PropsBinder.getFromProperties;
+import static java.util.Spliterator.ORDERED;
 import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(level = PRIVATE)
@@ -32,14 +32,19 @@ public class ConnectionPool implements Supplier<Connection>, Closeable {
     final BlockingQueue<PooledConnection> connectionQueue;
     volatile boolean opened;
 
-    @SneakyThrows
     public ConnectionPool() {
+        this("db");
+    }
 
-        ConnectionFactory connectionFactory = getFromProperties(ConnectionFactory.class, "db");
+    @SneakyThrows
+    public ConnectionPool(String fileName) {
 
-        Function<Connection, PooledConnection> pooledConnectionFactory = Function2.narrow(
-                PooledConnection::new)
-                .apply(this::closePolledConnection);
+        ConnectionFactory connectionFactory = getFromProperties(
+                ConnectionFactory.class, fileName);
+
+        Function<Connection, PooledConnection> pooledConnectionFactory =
+                Function2.narrow(PooledConnection::new)
+                        .apply(this::closePolledConnection);
 
         int poolSize = connectionFactory.getPoolSize();
         connectionQueue = IntStream.range(0, poolSize)
@@ -66,11 +71,24 @@ public class ConnectionPool implements Supplier<Connection>, Closeable {
     @SneakyThrows
     private static Optional<String> getFileAsString(String initScriptsPath, String name) {
         val path = String.format("/%s/%s.sql", initScriptsPath, name);
-        return Optional.ofNullable(ConnectionPool.class.getResource(path))
-                .map(CheckedFunction1.narrow(URL::toURI).unchecked())
-                .map(Paths::get)
-                .map(CheckedFunction1.<Path, Stream<String>>narrow(Files::lines).unchecked())
-                .map(stringStream -> stringStream.collect(Collectors.joining()));
+        return Optional.ofNullable(ConnectionPool.class.getResourceAsStream(path))
+                .map(Scanner::new)
+                .map(scanner -> scanner.useDelimiter(System.lineSeparator()))
+                .map(ConnectionPool::withStream)
+                .map(ConnectionPool::collect);
+    }
+
+    private static String collect(Tuple2<Scanner, Stream<String>> scannerAndStreamTuple) {
+        try (scannerAndStreamTuple._1) {
+            val lines = scannerAndStreamTuple._2;
+            return lines.collect(Collectors.joining());
+        }
+    }
+
+    private static Tuple2<Scanner, Stream<String>> withStream(Scanner scanner) {
+        return Tuple.of(scanner, StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(scanner, ORDERED),
+                false));
     }
 
     @SneakyThrows

@@ -12,11 +12,13 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
-@FieldDefaults(level = PRIVATE)
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 class ConnectionPoolTest {
 
-    static final String SQL =
+    static String SQL =
             "select id, first_name, last_name, permission, dob, email, password, address, telephone from Person";
 
     @Test
@@ -30,7 +32,7 @@ class ConnectionPoolTest {
              val statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(SQL)) {
             if (resultSet.next())
-                System.out.printf("Hello, %s", resultSet.getString("first_name"));
+                assertThat(resultSet.getString("first_name"), is("Jose"));
         }
     }
 }
